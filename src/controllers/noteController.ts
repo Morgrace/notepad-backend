@@ -34,6 +34,26 @@ export const getNote = catchAsync(async (req, res, next) => {
   });
 });
 
+export const updateNote = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  const body = req.body;
+
+  const note = await Note.findById(id);
+
+  if (!note) return next(new Error("No note with that ID"));
+
+  note.title = body.title || note.content;
+  note.content = body.content || note.content;
+  note.updatedAt = new Date();
+
+  const updatedNote = await note.save();
+
+  res.status(200).json({
+    status: "success",
+    data: updatedNote,
+  });
+});
+
 export const deleteNote = catchAsync(async (req, res, next) => {
   const id = req.params.id;
 
