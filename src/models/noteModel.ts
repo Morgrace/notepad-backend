@@ -1,24 +1,29 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
+import { INote } from "../types";
 
-type Note = Document & {
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-const noteSchema = new mongoose.Schema<Note>(
+const noteSchema = new mongoose.Schema<INote>(
   {
     title: String,
     content: String,
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: Date,
+    createdBy: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+    },
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
+
+noteSchema.methods.createdByUser = function (
+  this: INote,
+  candidateId: string,
+  candidateRole: string
+) {
+  return this.createdBy.toString() === candidateId || candidateRole === "admin";
+};
 
 const Note = mongoose.model("Note", noteSchema);
 export default Note;

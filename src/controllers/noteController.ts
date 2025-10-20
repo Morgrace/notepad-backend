@@ -1,23 +1,16 @@
 import Note from "../models/noteModel";
 import catchAsync from "../utils/catchAsync";
 
-export const createNote = catchAsync(async (req, res, next) => {
-  const notes = await Note.create(req.body);
-
-  res.status(201).json({
-    status: "success",
-    results: Array.isArray(notes) ? notes.length : "",
-    data: notes,
-  });
-});
-
 export const getAllNotes = catchAsync(async (req, res, next) => {
-  const notes = await Note.find();
+  const notes = await Note.find().populate({
+    path: "createdBy",
+    select: "firstName lastName email _id ",
+  });
 
   res.status(200).json({
     status: "success",
     results: notes.length,
-    data: notes,
+    data: { notes },
   });
 });
 
@@ -30,7 +23,7 @@ export const getNote = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: note,
+    data: { note },
   });
 });
 
@@ -50,7 +43,7 @@ export const updateNote = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: updatedNote,
+    data: { note: updatedNote },
   });
 });
 

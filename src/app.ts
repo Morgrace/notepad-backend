@@ -2,17 +2,28 @@ import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 import noteRouter from "./routes/noteRoutes";
+import userRouter from "./routes/userRoutes";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 //parse request body
 app.use(express.json());
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
 //Routes
 app.use("/api/v1/notes", noteRouter);
+app.use("/api/v1/users", userRouter);
 
 //Handling undefined routes
 app.use((req, res, next) => {
