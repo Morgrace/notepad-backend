@@ -1,7 +1,7 @@
-import Note from "../../models/noteModel";
-import { IAuthenticatedRequest } from "../../types";
-import AppError from "../../utils/appError";
-import catchAsync from "../../utils/catchAsync";
+import Note from "../models/noteModel";
+import { IAuthenticatedRequest } from "../types";
+import AppError from "../utils/appError";
+import catchAsync from "../utils/catchAsync";
 
 export const restrictToOwnerOrAdmin = catchAsync(
   async (req: IAuthenticatedRequest, res, next) => {

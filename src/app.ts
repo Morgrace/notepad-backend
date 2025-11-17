@@ -1,14 +1,13 @@
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 
+import mongoose from "mongoose";
 import noteRouter from "./routes/noteRoutes";
 import userRouter from "./routes/userRoutes";
-import { timeStamp } from "console";
-import { uptime } from "process";
-import mongoose from "mongoose";
+import globalErrorHandler from "./middleware/globalErrorHandler.middleware";
 
 const app = express();
 
@@ -58,11 +57,6 @@ app.use((req, res, next) => {
 });
 
 //Global error handler
-app.use((err, req, res, next) => {
-  res.status(500).json({
-    errorMessage: err.message,
-    err,
-  });
-});
+app.use(globalErrorHandler);
 
 export default app;

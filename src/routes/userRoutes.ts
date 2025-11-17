@@ -1,9 +1,9 @@
 import express from "express";
 import { login, signup } from "../controllers/authController";
-import { validate } from "../middleware/validation/validateInput.middleware";
+import { validate } from "../middleware/validateInput.middleware";
 import { signupSchema } from "../schemas/signup.schema";
 import { loginSchema } from "../schemas/login.schema";
-import { protect } from "../middleware/auth/protect.middleware";
+import { protect } from "../middleware/protect.middleware";
 import {
   createNote,
   getUser,

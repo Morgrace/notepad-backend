@@ -1,8 +1,8 @@
-import { UserModel } from "../../models/userModel";
-import { IAuthenticatedRequest } from "../../types";
-import AppError from "../../utils/appError";
-import catchAsync from "../../utils/catchAsync";
-import { verifyJWT } from "../../utils/JWTHelper";
+import { UserModel } from "../models/userModel";
+import { IAuthenticatedRequest } from "../types";
+import AppError from "../utils/appError";
+import catchAsync from "../utils/catchAsync";
+import { verifyJWT } from "../utils/JWTHelper";
 
 export const protect = catchAsync(
   async (req: IAuthenticatedRequest, res, next) => {
