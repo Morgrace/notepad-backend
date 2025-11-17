@@ -38,6 +38,7 @@ export const createSendToken = (
     maxAge:
       Number.parseFloat(process.env.JWT_EXPIRES_IN!) * 24 * 60 * 60 * 1000,
     httpOnly: true,
+    sameSite: "none",
   };
 
   if (process.env.NODE_ENV === "production") {

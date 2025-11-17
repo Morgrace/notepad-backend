@@ -5,8 +5,8 @@ import {
   getNote,
   updateNote,
 } from "../controllers/noteController";
-import { protect } from "../middleware/auth/protect.middleware";
-import { restrictToOwnerOrAdmin } from "../middleware/auth/restrictToOwnerOrAdmin.middleware";
+import { protect } from "../middleware/protect.middleware";
+import { restrictToOwnerOrAdmin } from "../middleware/restrictToOwnerOrAdmin.middleware";
 
 const router = express.Router();
 
