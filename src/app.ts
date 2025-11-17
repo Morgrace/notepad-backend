@@ -1,15 +1,23 @@
+import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
-
+import mongoSanitize from "@exortek/express-mongo-sanitize";
+import compression from "compression";
+import helmet from "helmet";
 import mongoose from "mongoose";
+
+import globalErrorHandler from "./middleware/globalErrorHandler.middleware";
 import noteRouter from "./routes/noteRoutes";
 import userRouter from "./routes/userRoutes";
-import globalErrorHandler from "./middleware/globalErrorHandler.middleware";
+import hpp from "hpp";
+import rateLimit from "express-rate-limit";
+import AppError from "./utils/appError";
 
 const app = express();
+
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -21,11 +29,43 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+// Needed to parse complex query strings to js objects might not need it in this application
+app.set("query parser", "extended");
+
 //parse request body
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
-if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
 
+// Set Security Http headers
+app.use(helmet());
+
+// Compress Response body with gzip
+app.use(compression());
+
+// Sanitization against NOSQL query injection
+app.use(mongoSanitize());
+
+// Prevent http parameter pollution
+app.use(hpp());
+
+const rateLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000, // 30mins
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    message: "Too many requests from this IP, please try again in 30 minutes!",
+  },
+});
+// Limit request from same ip
+app.use("/api", rateLimiter);
 //Routes
 app.use("/api/v1/notes", noteRouter);
 app.use("/api/v1/users", userRouter);
@@ -53,7 +93,7 @@ app.get("/api/v1/health", async (req, res) => {
 
 //Handling undefined routes
 app.use((req, res, next) => {
-  next(new Error(`Can't find ${req.originalUrl} on this server!`));
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 //Global error handler
