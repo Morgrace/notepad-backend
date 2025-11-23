@@ -4,6 +4,7 @@ import {
   login,
   resetPassword,
   signup,
+  updateMyPassword,
 } from "../controllers/authController";
 import { validate } from "../middleware/validateInput.middleware";
 import { signupSchema } from "../schemas/signup.schema";
@@ -16,6 +17,7 @@ import {
 } from "../controllers/userController";
 import { forgotPasswordSchema } from "../schemas/forgotPassword.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
+import { updatePasswordSchema } from "../schemas/updatePassword.schema";
 
 const router = express.Router();
 
@@ -30,6 +32,12 @@ router.patch(
 );
 
 router.use(protect);
+
+router.patch(
+  "/updateMyPassword",
+  validate(updatePasswordSchema),
+  updateMyPassword
+);
 
 router.get("/me", getUser);
 

@@ -6,6 +6,7 @@ import catchAsync from "../utils/catchAsync";
 import { sendEmail } from "../utils/email/email";
 import { resetPasswordTemplate } from "../utils/email/resetPasswordTemplate";
 import { createSendToken } from "../utils/JWTHelper";
+import { IAuthenticatedRequest } from "../types";
 
 export const signup = catchAsync(async (req, res, next) => {
   const newUser = await UserModel.create<Omit<Signup, "passwordConfirm">>({
@@ -102,21 +103,56 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
 export const resetPassword = catchAsync(async (req, res, next) => {
   // Get user based on the token
-  const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
 
   const user = await UserModel.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: {$gt: Date.now()},
-  })
+    passwordResetExpires: { $gt: Date.now() },
+  });
 
-  if(!user){
-    return next(new AppError("Token is invalid or has expired",400));
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
   }
 
   user.password = req.body.password;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
-  await user.save()
+  await user.save();
 
-  createSendToken(user,200,res)
+  createSendToken(user, 200, res);
 });
+
+export const updateMyPassword = catchAsync(
+  async (req: IAuthenticatedRequest, res, next) => {
+    if (!req.user) {
+      return next(
+        new AppError("You must be logged in to perform this action", 401)
+      );
+    }
+
+    // Get user from colleciton
+    const user = await UserModel.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return next(new AppError("User does not exist! Please signup!", 404));
+    }
+
+    // Check if POSTed current password is correct
+    if (
+      !(await user.correctPassword(req.body.passwordCurrent, user.password))
+    ) {
+      return next(new AppError("Your current password is wrong", 401));
+    }
+
+    // Update password
+    user.password = req.body.password;
+    user.passwordChangedAt = new Date(Date.now() - 1000);
+    await user.save();
+
+    //Log user in, send JWT
+    createSendToken(user, 200, res);
+  }
+);
