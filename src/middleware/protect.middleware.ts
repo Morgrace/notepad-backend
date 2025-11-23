@@ -22,14 +22,26 @@ export const protect = catchAsync(
         new AppError("You are not logged in! Please log in to get access", 401)
       );
 
+    // Validate token
     const decoded = await verifyJWT(token, process.env.JWT_SECRET!);
 
+    // Validate user
     const currentUser = await UserModel.findById(decoded.id);
 
     if (!currentUser) {
       return next(
         new AppError(
           "The user belonging to this token does no longer exist",
+          401
+        )
+      );
+    }
+
+    // Check if user changed password after token was issued;
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError(
+          "User recently changed passwowrd! Please log in again",
           401
         )
       );

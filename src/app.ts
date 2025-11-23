@@ -64,7 +64,7 @@ const rateLimiter = rateLimit({
     message: "Too many requests from this IP, please try again in 30 minutes!",
   },
 });
-// Limit request from same ip
+// Limit request from same IP
 app.use("/api", rateLimiter);
 //Routes
 app.use("/api/v1/notes", noteRouter);

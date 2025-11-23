@@ -18,4 +18,6 @@ export interface IUser extends Document {
     candidatePassword: string,
     userPassword: string
   ): Promise<boolean>;
+  createPasswordResetToken(): string;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
 }

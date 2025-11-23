@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import crypto from "node:crypto";
 import { IUser } from "../types";
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -78,6 +79,32 @@ userSchema.methods.correctPassword = async function (
   userPassword: string
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.createPasswordResetToken = function (this: IUser) {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10mins
+
+  return resetToken;
+};
+
+userSchema.methods.changedPasswordAfter = function (
+  this: IUser,
+  JWTTimestamp: number
+): boolean {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = Math.floor(
+      this.passwordChangedAt.getTime() / 1000
+    );
+    return changedTimestamp > JWTTimestamp;
+  }
+  return false;
 };
 
 export const UserModel = mongoose.model("User", userSchema);
