@@ -19,6 +19,8 @@ const noteSchema = new mongoose.Schema<INote>(
   }
 );
 
+noteSchema.index({ createdBy: 1 });
+
 // Preserving and passing isNew state; since Mongoose will set 'isNew' to 'false' if save() succeeds
 noteSchema.pre("save", function () {
   this.$locals.wasNew = this.isNew;

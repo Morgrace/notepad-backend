@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 import { IUser } from "../types";
+import { Query } from "mongoose";
 
 const userSchema = new mongoose.Schema<IUser>(
   {
@@ -62,6 +63,15 @@ const userSchema = new mongoose.Schema<IUser>(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+userSchema.pre(/^find/, function (this: Query<IUser[], IUser>, next) {
+  const options = this.getOptions();
+  if (options.includeInactive) {
+    return next();
+  }
+  this.find({ active: { $ne: false } });
   next();
 });
 

@@ -6,18 +6,27 @@ import {
   signup,
   updateMyPassword,
 } from "../controllers/authController";
-import { validate } from "../middleware/validateInput.middleware";
-import { signupSchema } from "../schemas/signup.schema";
-import { loginSchema } from "../schemas/login.schema";
-import { protect } from "../middleware/protect.middleware";
 import {
   createNote,
+  deleteMe,
+  deleteUser,
+  getAllUsers,
+  getMe,
+  getMyNotes,
   getUser,
-  getUserNotes,
+  updateMe,
+  updateUser,
 } from "../controllers/userController";
+import { protect } from "../middleware/protect.middleware";
+import { validate } from "../middleware/validateInput.middleware";
 import { forgotPasswordSchema } from "../schemas/forgotPassword.schema";
+import { loginSchema } from "../schemas/login.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
+import { signupSchema } from "../schemas/signup.schema";
+import { updateMeSchema } from "../schemas/updateMe.schema";
 import { updatePasswordSchema } from "../schemas/updatePassword.schema";
+import { upload } from "../utils/multer";
+import { restrictToAdmin } from "../middleware/restrictToAdmin.middleware";
 
 const router = express.Router();
 
@@ -39,9 +48,20 @@ router.patch(
   updateMyPassword
 );
 
-router.get("/me", getUser);
+router.patch(
+  "/updateMe",
+  upload.single("photo"),
+  validate(updateMeSchema),
+  updateMe
+);
+router.delete("/deleteMe", deleteMe);
 
 // Exclusive user notes
-router.route("/me/notes").get(getUserNotes).post(createNote);
+router.get("/me", getMe);
+router.route("/me/notes").get(getMyNotes).post(createNote);
 
+// Admin routes
+router.use(restrictToAdmin);
+router.route("/").get(getAllUsers);
+router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 export default router;

@@ -7,15 +7,17 @@ import mongoSanitize from "@exortek/express-mongo-sanitize";
 import compression from "compression";
 import helmet from "helmet";
 import mongoose from "mongoose";
+import hpp from "hpp";
+import rateLimit from "express-rate-limit";
+import path from "path";
 
 import globalErrorHandler from "./middleware/globalErrorHandler.middleware";
 import noteRouter from "./routes/noteRoutes";
 import userRouter from "./routes/userRoutes";
-import hpp from "hpp";
-import rateLimit from "express-rate-limit";
 import AppError from "./utils/appError";
 
 const app = express();
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.set("trust proxy", 1);
 
