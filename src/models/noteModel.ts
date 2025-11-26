@@ -35,6 +35,15 @@ noteSchema.post("save", async function () {
   }
 });
 
+//Deletes notes from UserModel
+noteSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await UserModel.findByIdAndUpdate(doc.createdBy, {
+      $pull: { notes: doc._id },
+    });
+  }
+});
+
 noteSchema.methods.createdByUser = function (
   this: INote,
   candidateId: string,

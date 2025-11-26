@@ -27,6 +27,7 @@ import { updateMeSchema } from "../schemas/updateMe.schema";
 import { updatePasswordSchema } from "../schemas/updatePassword.schema";
 import { upload } from "../utils/multer";
 import { restrictToAdmin } from "../middleware/restrictToAdmin.middleware";
+import { createUpdateNoteSchema } from "../schemas/createUpdateNote.schema";
 
 const router = express.Router();
 
@@ -58,7 +59,10 @@ router.delete("/deleteMe", deleteMe);
 
 // Exclusive user notes
 router.get("/me", getMe);
-router.route("/me/notes").get(getMyNotes).post(createNote);
+router
+  .route("/me/notes")
+  .get(getMyNotes)
+  .post(validate(createUpdateNoteSchema), createNote);
 
 // Admin routes
 router.use(restrictToAdmin);

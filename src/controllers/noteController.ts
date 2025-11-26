@@ -1,4 +1,6 @@
 import Note from "../models/noteModel";
+import { INoteRequest } from "../types";
+import AppError from "../utils/appError";
 import catchAsync from "../utils/catchAsync";
 
 export const getAllNotes = catchAsync(async (req, res, next) => {
@@ -14,12 +16,8 @@ export const getAllNotes = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getNote = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
-
-  const note = await Note.findById(id);
-
-  if (!note) return next(new Error(`No note could be found with ID: ${id}`));
+export const getNote = catchAsync(async (req: INoteRequest, res, next) => {
+  const note = req.note;
 
   res.status(200).json({
     status: "success",
@@ -27,17 +25,22 @@ export const getNote = catchAsync(async (req, res, next) => {
   });
 });
 
-export const updateNote = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+export const updateNote = catchAsync(async (req: INoteRequest, res, next) => {
+  const note = req.note;
   const body = req.body;
 
-  const note = await Note.findById(id);
+  const title = body?.title;
+  const content = body?.content;
 
-  if (!note) return next(new Error("No note with that ID"));
+  // Check if anything to update
+  if (title === undefined && content === undefined) {
+    return next(
+      new AppError("Please provide at least one field to update", 400)
+    );
+  }
 
-  note.title = body.title || note.content;
-  note.content = body.content || note.content;
-  note.updatedAt = new Date();
+  if (title !== undefined) note.title = title;
+  if (content !== undefined) note.content = content;
 
   const updatedNote = await note.save();
 
@@ -47,11 +50,10 @@ export const updateNote = catchAsync(async (req, res, next) => {
   });
 });
 
-export const deleteNote = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+export const deleteNote = catchAsync(async (req: INoteRequest, res, next) => {
+  const note = req.note;
 
-  const note = await Note.findByIdAndDelete(id);
-  if (!note) return next(new Error("No note with that ID"));
+  await Note.findByIdAndDelete(note._id);
 
   res.status(204).json({
     status: "success",
