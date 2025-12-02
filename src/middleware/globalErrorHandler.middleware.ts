@@ -7,6 +7,11 @@ import { handleValidationErrorDB } from "../utils/errorHanders/handleValidationE
 import { handleCastErrorDB } from "../utils/errorHanders/handleCastErrorDB";
 import { handleJWTError } from "../utils/errorHanders/handleJWTError";
 import { handleJWTExpiredError } from "../utils/errorHanders/handleJWTExpiredError";
+import {
+  handleCloudinaryError,
+  handleMulterError,
+  handleSharpError,
+} from "../utils/errorHanders/handleUploadError";
 
 function sendErrorInDevelopment(error: IAppError, res: Response) {
   res.status(error.statusCode).json({
@@ -44,7 +49,13 @@ function globalErrorHandler(
   if (process.env.NODE_ENV === "development") {
     sendErrorInDevelopment(error, res);
   } else if (process.env.NODE_ENV === "production") {
-    let errorProd: IAppError = Object.assign({}, error);
+    // copy non enumerable properties
+    let errorProd: IAppError = {
+      ...error,
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
 
     if (error instanceof ZodError) {
       errorProd = handleZodError(error);
@@ -52,6 +63,22 @@ function globalErrorHandler(
 
     if (error.code === 11000) {
       errorProd = handleDuplicateFieldsDB(errorProd);
+    }
+
+    if (error.name === "MulterError") {
+      errorProd = handleMulterError(error);
+    }
+
+    if (
+      error.message?.includes("sharp") ||
+      error.message?.includes("Input buffer") ||
+      error.message?.includes("Expected valid")
+    ) {
+      errorProd = handleSharpError(error);
+    }
+
+    if (error.name === "Error" && error.message?.includes("Cloudinary")) {
+      errorProd = handleCloudinaryError(error);
     }
 
     if (error.name === "ValidationError") {

@@ -18,16 +18,16 @@ import {
   updateUser,
 } from "../controllers/userController";
 import { protect } from "../middleware/protect.middleware";
+import { restrictToAdmin } from "../middleware/restrictToAdmin.middleware";
+import { upload } from "../middleware/upload.middleware";
 import { validate } from "../middleware/validateInput.middleware";
+import { createUpdateNoteSchema } from "../schemas/createUpdateNote.schema";
 import { forgotPasswordSchema } from "../schemas/forgotPassword.schema";
 import { loginSchema } from "../schemas/login.schema";
 import { resetPasswordSchema } from "../schemas/resetPassword.schema";
 import { signupSchema } from "../schemas/signup.schema";
 import { updateMeSchema } from "../schemas/updateMe.schema";
 import { updatePasswordSchema } from "../schemas/updatePassword.schema";
-import { upload } from "../utils/multer";
-import { restrictToAdmin } from "../middleware/restrictToAdmin.middleware";
-import { createUpdateNoteSchema } from "../schemas/createUpdateNote.schema";
 
 const router = express.Router();
 

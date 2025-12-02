@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema<IUser>(
       select: false,
     },
     photo: String,
+    photoPublicId: String,
     createdAt: {
       type: Date,
       default: Date.now,

@@ -1,4 +1,3 @@
-
 import { IAppError } from "../../types";
 import AppError from "../appError";
 
@@ -6,14 +5,13 @@ export const handleDuplicateFieldsDB = (err: IAppError) => {
   let value = "";
   let field = "";
 
-  // First, try to get the duplicate value from the keyValue object (cleanest approach)
+  // Extract field and value
   if (err.keyValue) {
     const duplicateField = Object.keys(err.keyValue)[0];
     field = duplicateField;
     value = err.keyValue[duplicateField];
   } else {
     // Fallback: parse the error message for the duplicate value
-    // Format: dup key: { fieldName: "value" }
     const dupKeyMatch = err.errmsg?.match(
       /dup key:\s*{\s*([^:]+):\s*"([^"]+)"\s*}/
     );
@@ -30,10 +28,20 @@ export const handleDuplicateFieldsDB = (err: IAppError) => {
     }
   }
 
-  // Create an informative error message
-  const fieldInfo = field ? ` for field '${field}'` : "";
-  const valueInfo = value ? `: '${value}'` : "";
-  const message = `Duplicate field value${fieldInfo}${valueInfo}. Please use another value`;
+  // Field-specific user-friendly messages
+  const fieldMessages: Record<string, string> = {
+    email: `The email address '${value}' is already registered. Please log in or use a different email.`,
+    username: `The username '${value}' is already taken. Please choose a different username.`,
+    phone: `This phone number is already registered. Please use a different number.`,
+    slug: `This URL is already in use. Please choose a different one.`,
+  };
+
+  // Use field-specific message if available, otherwise generic
+  const message =
+    fieldMessages[field] ||
+    `A duplicate value was detected${field ? ` for ${field}` : ""}${
+      value ? `: '${value}'` : ""
+    }. Please use a different value.`;
 
   return new AppError(message, 400);
 };

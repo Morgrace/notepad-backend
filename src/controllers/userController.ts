@@ -1,8 +1,12 @@
+import { UploadApiResponse } from "cloudinary";
 import Note from "../models/noteModel";
 import { UserModel } from "../models/userModel";
-import { IAuthenticatedRequest, IUser } from "../types";
+import { IAuthenticatedRequest } from "../types";
 import AppError from "../utils/appError";
 import catchAsync from "../utils/catchAsync";
+import cloudinary from "../utils/cloudinaryConfig";
+import { processImage } from "../utils/imageProcessor";
+import { uploadBufferToCloudinary } from "../utils/cloudinaryHelpers";
 
 export const getMe = catchAsync(
   async (req: IAuthenticatedRequest, res, next) => {
@@ -66,8 +70,26 @@ export const updateMe = catchAsync(
 
     // Add photo if uploaded
     if (req.file) {
-      const relativePath = `/upload/image/users/${req.file.filename}`;
-      filteredBody.photo = relativePath;
+      // const relativePath = `/upload/image/users/${req.file.filename}`;
+
+      // Process Image with Sharp
+      const processedBuffer = await processImage(req.file.buffer, {
+        width: 800,
+        height: 800,
+        quality: 80,
+        format: "webp",
+      });
+
+      const result = await uploadBufferToCloudinary(processedBuffer, {
+        folder: `users/${req.user._id}/profile`,
+        public_id: "avatar",
+        overwrite: true,
+        invalidate: true,
+        resource_type: "image",
+      });
+
+      filteredBody.photo = result.secure_url;
+      filteredBody.photoPublicId = result.public_id;
     }
 
     // Check if there are actually fields to update
