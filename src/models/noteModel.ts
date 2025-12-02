@@ -19,6 +19,8 @@ const noteSchema = new mongoose.Schema<INote>(
   }
 );
 
+noteSchema.index({ createdBy: 1 });
+
 // Preserving and passing isNew state; since Mongoose will set 'isNew' to 'false' if save() succeeds
 noteSchema.pre("save", function () {
   this.$locals.wasNew = this.isNew;
@@ -29,6 +31,15 @@ noteSchema.post("save", async function () {
   if (this.$locals.wasNew) {
     await UserModel.findByIdAndUpdate(this.createdBy, {
       $addToSet: { notes: this._id },
+    });
+  }
+});
+
+//Deletes notes from UserModel
+noteSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await UserModel.findByIdAndUpdate(doc.createdBy, {
+      $pull: { notes: doc._id },
     });
   }
 });

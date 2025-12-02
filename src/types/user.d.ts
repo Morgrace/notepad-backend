@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   photo?: string;
+  photoPublicId: string;
   role: "admin" | "user";
   notes: mongoose.Types.ObjectId[];
   passwordChangedAt?: Date;
@@ -18,4 +19,6 @@ export interface IUser extends Document {
     candidatePassword: string,
     userPassword: string
   ): Promise<boolean>;
+  createPasswordResetToken(): string;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
 }

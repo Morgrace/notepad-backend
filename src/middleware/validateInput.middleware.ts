@@ -1,4 +1,4 @@
-import catchAsync from "../../utils/catchAsync";
+import catchAsync from "../utils/catchAsync";
 import z from "zod";
 
 export const validate = <T>(schema: z.ZodSchema<T>) =>
