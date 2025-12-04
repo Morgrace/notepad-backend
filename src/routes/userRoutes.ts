@@ -2,6 +2,7 @@ import express from "express";
 import {
   forgotPassword,
   login,
+  logout,
   resetPassword,
   signup,
   updateMyPassword,
@@ -34,6 +35,7 @@ const router = express.Router();
 // Authentication routes
 router.post("/signup", validate(signupSchema), signup);
 router.post("/login", validate(loginSchema), login);
+router.post("/logout", logout);
 router.post("/forgotPassword", validate(forgotPasswordSchema), forgotPassword);
 router.patch(
   "/resetPassword/:token",
