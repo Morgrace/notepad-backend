@@ -5,16 +5,17 @@ export const signupSchema = z
     firstName: z
       .string()
       .trim()
-      .toLowerCase()
       .min(2, "First name is required")
-      .max(50, "First name too long"),
+      .max(50, "First name too long")
+      .transform((val) => val.toLowerCase()),
     lastName: z
       .string()
       .trim()
-      .toLowerCase()
       .min(2, "Last name is required")
-      .max(50, "Last name too long"),
-    email: z.email(),
+      .max(50, "Last name too long")
+      .transform((val) => val.toLowerCase()),
+
+    email: z.email().transform((val=> val.toLowerCase())),
     password: z
       .string()
       .min(8, "Password should be at least 8 characters")
