@@ -156,3 +156,16 @@ export const updateMyPassword = catchAsync(
     createSendToken(user, 200, res);
   }
 );
+
+export const logout = catchAsync(async (req, res, next) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    expires: new Date(0),
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "logged out successfully",
+  });
+});

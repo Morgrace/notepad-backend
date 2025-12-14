@@ -17,9 +17,9 @@ router.use(protect);
 
 router.get("/", restrictToAdmin, getAllNotes);
 
-router.use(restrictToOwnerOrAdmin);
 router
   .route("/:id")
+  .all(restrictToOwnerOrAdmin)
   .get(getNote)
   .patch(validate(createUpdateNoteSchema), updateNote)
   .delete(deleteNote);
