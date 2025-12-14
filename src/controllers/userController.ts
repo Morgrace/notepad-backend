@@ -70,8 +70,6 @@ export const updateMe = catchAsync(
 
     // Add photo if uploaded
     if (req.file) {
-      // const relativePath = `/upload/image/users/${req.file.filename}`;
-
       // Process Image with Sharp
       const processedBuffer = await processImage(req.file.buffer, {
         width: 800,
